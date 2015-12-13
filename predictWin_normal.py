@@ -1,5 +1,6 @@
 import math
 import scipy.stats
+import itertools
 
 # Class: CurrentStatistics
 # -------------------------
@@ -7,7 +8,7 @@ import scipy.stats
 class CurrentStatistics:
 	def __init__(self, categories, myCategories, oppCategories):
 		assert(set(categories.keys()) == set(myCategories.keys()) and set(categories.keys()) == set(oppCategories.keys()))
-		assert(value == '+' or value == '-' for key, value in categories.iteritems())
+		assert(value == '+' or value == '-' or value == '%' for key, value in categories.iteritems())
 		self.categories = categories
 		self.myCategories = myCategories
 		self.oppCategories = oppCategories
@@ -15,12 +16,10 @@ class CurrentStatistics:
 	#assumes my players is a dictionary from the category to (mean, std) tuples
 	def probWinOneDay(self, myPlayers, oppPlayers): 
 		assert(all(set(myPlayer.keys()) == set(oppPlayer.keys()) and set(myPlayer.keys()) == set(self.categories.keys()) for myPlayer in myPlayers for oppPlayer in oppPlayers))
-
 		probWinningCategory = {}
-
 		myPlayerCategories = {}
 		oppPlayerCategores = {}
-		for category, plusOrMinus in self.categories.iteritems():
+		for category, plusOrMinusOrPercent in self.categories.iteritems():
 			myMean = 0
 			myStd = 0
 			for player in myPlayers:
@@ -42,6 +41,24 @@ class CurrentStatistics:
 			elif plusOrMinus == '-':
 				probWinningCategory[category] = scipy.stats.norm(differenceMean, differenceStd).cdf(0)
 			print 'Probability of winning %s: %f' % (category, probWinningCategory[category])
+
+		categories = probWinningCategory.keys()
+		numCategories = float(len(categories))
+		numCategoriesToWin = int(math.ceil(numCategories / 2.0))
+		probWinning = 0
+		for i in range(numCategoriesToWin, len(categories) + 1):
+			combinations = list(itertools.combinations(categories, i))
+			for combo in combinations:
+				probWinningCombo = 1
+				for category in categories:
+					if category in combo:
+						probWinningCombo *= probWinningCategory[category]
+					else:
+						probWinningCombo *= (1 - probWinningCategory[category])
+				probWinning += probWinningCombo
+				print 'Probability of winning %s: %f' %(combo, probWinningCombo)
+		print 'Probability of winning more categories overall: ', probWinning
+
 
 categories = {'3PM': '+', 'REB': '+', 'AST': '+', 'STL': '+', 'BLK': '+', 'TO': '-', 'PTS': '+'}
 me = {'3PM': 40, 'REB': 294, 'AST': 140, 'STL': 56, 'BLK': 36, 'TO': 93, 'PTS': 612}
