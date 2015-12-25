@@ -14,8 +14,12 @@ def probWin(myPlayers, oppPlayers):
 	for player in myPlayers:
 		stats = getPlayerStats(player)
 		myPlayerStats.append(stats)
+		myPlayerStats.append(stats)
+		myPlayerStats.append(stats)
 	for player in oppPlayers:
 		stats = getPlayerStats(player)
+		oppPlayerStats.append(stats)
+		oppPlayerStats.append(stats)
 		oppPlayerStats.append(stats)
 	categories = {'FG%': '+', 'FT%': '+', '3PM': '+', 'REB': '+', 'AST': '+', 'STL': '+', 'BLK': '+', 'TO': '-', 'PTS': '+'}
 	for category, plusOrMinus in categories.iteritems():
@@ -94,10 +98,40 @@ def probWin(myPlayers, oppPlayers):
 			probWinning += probWinningCombo
 			#print 'Probability of winning %s: %f' %(combo, probWinningCombo)
 	print 'Probability of winning more categories overall: ', probWinning
+	return probWinning
 
-probWin(['Lebron James', 'Kevin Durant', 'Kawhi Leonard'], ['Andre Miller', 'Danny Green', 'Isaiah Canaan'])
+Austin = ['Thaddeus Young', 'Jahlil Okafor', 'Marc Gasol', 'Eric Bledsoe', 'Kevin Love', 'Tobias Harris', 'John Wall', 'DeMarcus Cousins', 'Avery Bradley', 'Marvin Williams', 'Rudy Gay', 'Tim Duncan', 'Jared Sullinger', 'Jrue Holiday']
+Wayland_pretrade = ['Mike Conley', 'Brandon Knight', 'Kentavious Caldwell-Pope', 'Zach Randolph', 'Serge Ibaka', 'Kyrie Irving', 'Blake Griffin', 'Stephen Curry', 'Kemba Walker', 'Monta Ellis', 'Elfrid Payton', 'Will Barton', 'Bismack Biyombo']
+Wayland_posttrade = ['Mike Conley', 'Marcin Gortat', 'Kentavious Caldwell-Pope', 'Zach Randolph', 'Serge Ibaka', 'Kyrie Irving', 'LeBron James', 'Stephen Curry', 'Kemba Walker', 'Monta Ellis', 'Elfrid Payton', 'Will Barton', 'Bismack Biyombo']
+Sam = ['Goran Dragic', 'Nicolas Batum', 'Robert Covington', 'Julius Randle', 'Greg Monroe', 'Andrew Wiggins', 'Kawhi Leonard', 'Russell Westbrook', 'Chris Bosh', 'George Hill', 'Carmelo Anthony', 'Kyle Korver', 'Kristaps Porzingis']
+Raymond = ['Rajon Rondo', 'Victor Oladipo', 'Kevin Durant', 'Paul George', 'Karl-Anthony Towns', 'Reggie Jackson', 'Kobe Bryant', 'Dwyane Wade', 'Jordan Clarkson', 'Nikola Vucevic', 'Danilo Gallinari', 'Wesley Matthews', 'Harrison Barnes']
+Jeremy = ['Chris Paul', 'Kyle Lowry', 'Jae Crowder', 'LaMarcus Aldridge', 'DeAndre Jordan', 'Ricky Rubio', 'Pau Gasol', 'Terrence Jones', 'Gorgui Dieng', 'Tony Parker', 'Deron Williams', 'Derrick Favors', 'Zaza Pachulia']
+Travis_pretrade = ['Damian Lillard', 'Tyreke Evans', 'LeBron James', 'Al Horford', 'Andre Drummond', 'Gordon Hayward', 'Trevor Ariza', 'Draymond Green', 'Dirk Nowitzki', 'Marcin Gortat', 'Giannis Antetokounmpo', 'DeMarre Carroll', 'Omri Casspi']
+Travis_posttrade = ['Damian Lillard', 'Tyreke Evans', 'Blake Griffin', 'Al Horford', 'Andre Drummond', 'Gordon Hayward', 'Trevor Ariza', 'Draymond Green', 'Dirk Nowitzki', 'Brandon Knight', 'Giannis Antetokounmpo', 'DeMarre Carroll', 'Omri Casspi']
 
+print
+print '---PRE-WAYLAND TRADE---'
+opponents = [Austin, Wayland_pretrade, Sam, Raymond, Jeremy]
+opponentNames = ['Austin', 'Wayland_pretrade', 'Sam', 'Raymond', 'Jeremy']
+averageProbWin = 0
+for index, opponent in enumerate(opponents):
+	print
+	print 'vs ' + opponentNames[index] + ': '
+	averageProbWin += probWin(Travis_pretrade, opponent)
+print
+print 'Average probability of winning: ', averageProbWin/len(opponentNames)
 
+print
+print '---PRE-WAYLAND TRADE---'
+opponents = [Austin, Wayland_posttrade, Sam, Raymond, Jeremy]
+opponentNames = ['Austin', 'Wayland_posttrade', 'Sam', 'Raymond', 'Jeremy']
+averageProbWin = 0
+for index, opponent in enumerate(opponents):
+	print
+	print 'vs ' + opponentNames[index] + ': '
+	averageProbWin += probWin(Travis_posttrade, opponent)
+print
+print 'Average probability of winning: ', averageProbWin/len(opponentNames)
 
 
 

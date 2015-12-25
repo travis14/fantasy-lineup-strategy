@@ -17,7 +17,10 @@ player_profile_links = [a_href['href'] for a_href in a_hrefs if a_href and PLAYE
 
 def getGameLogs(name):
 	nameWithHyphen = "-".join(name.lower().split())
-	profile_link = next(link for link in player_profile_links if nameWithHyphen in link)
+	try:
+		profile_link = next(link for link in player_profile_links if nameWithHyphen in link)
+	except:
+		print 'name with error: ', name
 	game_log_link = profile_link.split('player', 1)[0] + 'player/gamelog' + profile_link.split('player', 1)[1]
 	game_log_soup = BeautifulSoup(urlopen(game_log_link), 'lxml')
 	table = game_log_soup.find_all('table')[1]
@@ -57,8 +60,8 @@ def getPlayerStats(name):
 			numGames += 1
 	fgms = [log['FGM-FGA'][0] for log in formattedGameLogs]
 	fgas = [log['FGM-FGA'][1] for log in formattedGameLogs]
-	ftms = [log['FGM-FGA'][0] for log in formattedGameLogs]
-	ftas = [log['FGM-FGA'][1] for log in formattedGameLogs]
+	ftms = [log['FTM-FTA'][0] for log in formattedGameLogs]
+	ftas = [log['FTM-FTA'][1] for log in formattedGameLogs]
 	threepms = [log['3PM'] for log in formattedGameLogs]
 	rebs = [log['REB'] for log in formattedGameLogs]
 	asts = [log['AST'] for log in formattedGameLogs]
