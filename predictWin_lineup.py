@@ -296,6 +296,9 @@ def findGoodFreeAgents(player1):
 	print sorted_pickups
 	return sorted_pickups
 
+# Function: probWin_v2
+# -------------------------
+# version 2 of the probWin function that calculates the probability of winning given current stats a certain point in the week
 def probWin_v2(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
 		probWinningCategory = {}
 		myPlayerCategories = {}
@@ -404,6 +407,10 @@ def probWin_v2(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
 						probWinningCombo *= (1 - probWinningCategory[category])
 				probWinning += probWinningCombo
 		return probWinning
+
+# Function: setLineup
+# -------------------------
+# Gives recommendations on which players to play given my current stats and opponent current stats
 def setLineup(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
 	maxProb = 0.0
 	maxLineup = None
@@ -414,34 +421,7 @@ def setLineup(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
 				maxProb = prob
 				maxLineup = list(subset)
 	return (maxLineup, maxProb)
-
-print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins'], ['Pau Gasol'])
-print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Pau Gasol'])
-print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Pau Gasol'])
-print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Jae Crowder'])
-print evaluateTrade(Travis2, Jeremy, ['Tobias Harris'], ['Jae Crowder'])
-print evaluateTrade(Travis2, Jeremy, ['Tobias Harris'], ['Jae Crowder'])
-print evaluateTrade(Travis2, Jeremy, ['Kevin Love', 'Tobias Harris'], ['Pau Gasol', 'Jae Crowder'])
-print evaluateTrade(Travis2, Jeremy, ['Kevin Love', 'Rudy Gay'], ['Pau Gasol', 'Jae Crowder'])
-print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins', 'Tobias Harris', 'John Wall'], ['Pau Gasol', 'Jae Crowder', 'Kyle Lowry'])
-print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins', 'Rudy Gay', 'John Wall'], ['Pau Gasol', 'Jae Crowder', 'Kyle Lowry'])
-print evaluateTrade(Travis2, Jeremy, ['John Wall'], ['Kyle Lowry'])
-print evaluateTrade(Travis2, Raymond, ['John Wall'], ['Reggie Jackson'])
-
-#print findGoodFreeAgents(Travis2)
-'''
-print probWinningAgainstOpponents(Travis2, Travis2)
-carrollTravis = copy.deepcopy(Travis2)
-carrollTravis.remove('Trevor Ariza')
-carrollTravis.append('DeMarre Carroll')
-print probWinningAgainstOpponents(Travis2, carrollTravis)
-'''
-
-'''
-myCurrStats = {'FGM': 147, 'FGA': 344, 'FTM': 79, 'FTA': 107, '3PM': 45, 'REB': 200, 'AST': 83, 'STL': 27, 'BLK': 17, 'TO': 52, 'PTS': 418}
-gabeCurrStats = {'FGM': 178, 'FGA': 338, 'FTM': 87, 'FTA': 118, '3PM': 42, 'REB': 182, 'AST':71, 'STL': 27, 'BLK': 27, 'TO': 68, 'PTS': 485}
-print setLineup(myCurrStats, gabeCurrStats, ['Trevor Ariza', 'LeBron James', 'Draymond Green', 'DeMarcus Cousins', 'Tyreke Evans', 'Tobias Harris', 'Dirk Nowitzki', 'Omri Casspi', 'Kevin Love', 'Marcin Gortat', 'Kent Bazemore', 'John Wall'], ['J.J. Redick', 'Hassan Whiteside', 'Klay Thompson', 'Nerlens Noel', 'Kenneth Faried', 'Arron Afflalo', 'Dwight Howard', 'James Harden', 'Kenneth Faried', 'C.J. McCollum', 'Jarrett Jack', 'Isaiah Thomas'])
-'''
+	
 #example commands
 '''
 findMutuallyBeneficialTrade(Travis2, Austin2)
@@ -449,4 +429,7 @@ evaluateTrade(Travis2, Wayland, ['Dirk Nowitzki'], ['Serge Ibaka'])
 print probWin(Travis2, Austin2)
 evaluateTrade(Travis, Austin, ['Damian Lillard'], ['John Wall'])
 findGoodFreeAgents(Travis)
+myCurrStats = {'FGM': 147, 'FGA': 344, 'FTM': 79, 'FTA': 107, '3PM': 45, 'REB': 200, 'AST': 83, 'STL': 27, 'BLK': 17, 'TO': 52, 'PTS': 418}
+gabeCurrStats = {'FGM': 178, 'FGA': 338, 'FTM': 87, 'FTA': 118, '3PM': 42, 'REB': 182, 'AST':71, 'STL': 27, 'BLK': 27, 'TO': 68, 'PTS': 485}
+print setLineup(myCurrStats, gabeCurrStats, ['Trevor Ariza', 'LeBron James', 'Draymond Green', 'DeMarcus Cousins', 'Tyreke Evans', 'Tobias Harris', 'Dirk Nowitzki', 'Omri Casspi', 'Kevin Love', 'Marcin Gortat', 'Kent Bazemore', 'John Wall'], ['J.J. Redick', 'Hassan Whiteside', 'Klay Thompson', 'Nerlens Noel', 'Kenneth Faried', 'Arron Afflalo', 'Dwight Howard', 'James Harden', 'Kenneth Faried', 'C.J. McCollum', 'Jarrett Jack', 'Isaiah Thomas'])
 '''
