@@ -165,8 +165,8 @@ def evaluateTrade(player1, player2, player1PlayersToTrade, player2PlayersToTrade
 	player2Opponents = copy.deepcopy(allPlayers)
 	player2Opponents.remove(player2)
 
-	'''
 	print '#### Evaluating ' + playerNamesPointguards[player1[0]] + '\'s and ' + playerNamesPointguards[player2[0]] + '\'s trade of ' + str(player1PlayersToTrade) + ' for ' + str(player2PlayersToTrade) + ' ####'
+	'''
 	print
 	print '---For ' + playerNamesPointguards[player1[0]] + ' pre-trade---'
 	'''
@@ -296,6 +296,152 @@ def findGoodFreeAgents(player1):
 	print sorted_pickups
 	return sorted_pickups
 
+def probWin_v2(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
+		probWinningCategory = {}
+		myPlayerCategories = {}
+		oppPlayerCategories = {}
+		myPlayerStats = []
+		oppPlayerStats = []
+		for player in myPlayersLeft:
+			if player in cache:
+				stats = cache[player]
+			else:
+				stats = getPlayerStats(player)
+				cache[player] = stats
+			myPlayerStats.append(stats)
+		for player in oppPlayersLeft:
+			if player in cache:
+				stats = cache[player]
+			else:
+				stats = getPlayerStats(player)
+				cache[player] = stats
+			oppPlayerStats.append(stats)
+		categories = {'FG%': '+', 'FT%': '+', '3PM': '+', 'REB': '+', 'AST': '+', 'STL': '+', 'BLK': '+', 'TO': '-', 'PTS': '+'}
+		for category, plusOrMinus in categories.iteritems():
+			myMean = 0
+			myStd = 0
+			if category == 'FG%':
+				totalFGAttempted = sum([player['FGA'][0] for player in myPlayerStats]) + myCurrStats['FGA']
+			elif category == 'FT%':
+				totalFTAttempted = sum([player['FTA'][0] for player in myPlayerStats]) + myCurrStats['FTA']
+			for player in myPlayerStats:
+				if category == 'FG%':
+					myMean += float(player['FGM'][0])
+					myStd = math.sqrt(myStd**2 + player['FGM'][1]**2)
+				elif category == 'FT%':
+					myMean += float(player['FTM'][0])
+					myStd = math.sqrt(myStd**2 + player['FTM'][1]**2)
+				else:
+					myMean += float(player[category][0])
+					myStd = math.sqrt(myStd**2 + player[category][1]**2)
+			if category == 'FG%':
+				myMean += myCurrStats['FGM']
+				myMean /= totalFGAttempted
+				myStd /= totalFGAttempted
+			elif category == 'FT%':
+				myMean += myCurrStats['FTM']
+				myMean /= totalFTAttempted
+				myStd /= totalFTAttempted
+			else:
+				myMean += myCurrStats[category]	
+			myPlayerCategories[category] = (myMean, myStd)
+
+			oppMean = 0
+			oppStd = 0
+			if category == 'FG%':
+				totalFGAttempted = sum([player['FGA'][0] for player in oppPlayerStats]) + oppCurrStats['FGA']
+			elif category == 'FT%':
+				totalFTAttempted = sum([player['FTA'][0] for player in oppPlayerStats]) + oppCurrStats['FTA']
+			for player in oppPlayerStats:
+				if category == 'FG%':
+					oppMean += float(player['FGM'][0])
+					oppStd = math.sqrt(oppStd**2 + player['FGM'][1]**2)
+				elif category == 'FT%':
+					oppMean += float(player['FTM'][0])
+					oppStd = math.sqrt(oppStd**2 + player['FTM'][1]**2)
+				else:
+					oppMean += float(player[category][0])
+					oppStd = math.sqrt(oppStd**2 + player[category][1]**2)
+			if category == 'FG%':
+				oppMean += oppCurrStats['FGM']
+				oppMean /= totalFGAttempted
+				oppStd /= totalFGAttempted
+			elif category == 'FT%':
+				oppMean += oppCurrStats['FTM']
+				oppMean /= totalFTAttempted
+				oppStd /= totalFTAttempted
+			else:
+				oppMean += oppCurrStats[category]	
+			oppPlayerCategories[category] = (oppMean, oppStd)
+
+			differenceMean = myMean - oppMean
+			differenceStd = math.sqrt(oppStd**2 + myStd**2)
+
+			if plusOrMinus == '+':
+				probWinningCategory[category] = 1.0 - scipy.stats.norm(differenceMean, differenceStd).cdf(0)
+			elif plusOrMinus == '-':
+				probWinningCategory[category] = scipy.stats.norm(differenceMean, differenceStd).cdf(0)
+			#print 'Probability of winning %s: %f' % (category, probWinningCategory[category])
+		#print 'myPlayerCategories: ',myPlayerCategories
+		#print 'oppPlayerCategories: ', oppPlayerCategories
+		netDifference = {}
+		for category in myPlayerCategories:
+			netDifference[category] = myPlayerCategories[category][0] - oppPlayerCategories[category][0]
+		#print 'Net difference: ', netDifference
+
+		categories = probWinningCategory.keys()
+		numCategories = float(len(categories))
+		numCategoriesToWin = int(math.ceil(numCategories / 2.0))
+		probWinning = 0
+		for i in range(numCategoriesToWin, len(categories) + 1):
+			combinations = list(itertools.combinations(categories, i))
+			for combo in combinations:
+				probWinningCombo = 1
+				for category in categories:
+					if category in combo:
+						probWinningCombo *= probWinningCategory[category]
+					else:
+						probWinningCombo *= (1 - probWinningCategory[category])
+				probWinning += probWinningCombo
+		return probWinning
+def setLineup(myCurrStats, oppCurrStats, myPlayersLeft, oppPlayersLeft):
+	maxProb = 0.0
+	maxLineup = None
+	for size in range(0, len(myPlayersLeft) + 1):
+		for subset in itertools.combinations(myPlayersLeft, size):
+			prob = probWin_v2(myCurrStats, oppCurrStats, list(subset), oppPlayersLeft) 
+			if prob > maxProb:
+				maxProb = prob
+				maxLineup = list(subset)
+	return (maxLineup, maxProb)
+
+print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins'], ['Pau Gasol'])
+print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Pau Gasol'])
+print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Pau Gasol'])
+print evaluateTrade(Travis2, Jeremy, ['Kevin Love'], ['Jae Crowder'])
+print evaluateTrade(Travis2, Jeremy, ['Tobias Harris'], ['Jae Crowder'])
+print evaluateTrade(Travis2, Jeremy, ['Tobias Harris'], ['Jae Crowder'])
+print evaluateTrade(Travis2, Jeremy, ['Kevin Love', 'Tobias Harris'], ['Pau Gasol', 'Jae Crowder'])
+print evaluateTrade(Travis2, Jeremy, ['Kevin Love', 'Rudy Gay'], ['Pau Gasol', 'Jae Crowder'])
+print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins', 'Tobias Harris', 'John Wall'], ['Pau Gasol', 'Jae Crowder', 'Kyle Lowry'])
+print evaluateTrade(Travis2, Jeremy, ['DeMarcus Cousins', 'Rudy Gay', 'John Wall'], ['Pau Gasol', 'Jae Crowder', 'Kyle Lowry'])
+print evaluateTrade(Travis2, Jeremy, ['John Wall'], ['Kyle Lowry'])
+print evaluateTrade(Travis2, Raymond, ['John Wall'], ['Reggie Jackson'])
+
+#print findGoodFreeAgents(Travis2)
+'''
+print probWinningAgainstOpponents(Travis2, Travis2)
+carrollTravis = copy.deepcopy(Travis2)
+carrollTravis.remove('Trevor Ariza')
+carrollTravis.append('DeMarre Carroll')
+print probWinningAgainstOpponents(Travis2, carrollTravis)
+'''
+
+'''
+myCurrStats = {'FGM': 147, 'FGA': 344, 'FTM': 79, 'FTA': 107, '3PM': 45, 'REB': 200, 'AST': 83, 'STL': 27, 'BLK': 17, 'TO': 52, 'PTS': 418}
+gabeCurrStats = {'FGM': 178, 'FGA': 338, 'FTM': 87, 'FTA': 118, '3PM': 42, 'REB': 182, 'AST':71, 'STL': 27, 'BLK': 27, 'TO': 68, 'PTS': 485}
+print setLineup(myCurrStats, gabeCurrStats, ['Trevor Ariza', 'LeBron James', 'Draymond Green', 'DeMarcus Cousins', 'Tyreke Evans', 'Tobias Harris', 'Dirk Nowitzki', 'Omri Casspi', 'Kevin Love', 'Marcin Gortat', 'Kent Bazemore', 'John Wall'], ['J.J. Redick', 'Hassan Whiteside', 'Klay Thompson', 'Nerlens Noel', 'Kenneth Faried', 'Arron Afflalo', 'Dwight Howard', 'James Harden', 'Kenneth Faried', 'C.J. McCollum', 'Jarrett Jack', 'Isaiah Thomas'])
+'''
 #example commands
 '''
 findMutuallyBeneficialTrade(Travis2, Austin2)
